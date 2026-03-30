@@ -1,0 +1,17 @@
+services:
+  packet-tracer-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: packet-tracer-ai
+    ports:
+      - "8000:8000"
+    environment:
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      MODEL_NAME: ${MODEL_NAME:-stepfun/step-3.5-flash:free}
+      FALLBACK_MODEL_NAMES: ${FALLBACK_MODEL_NAMES:-stepfun/step-3.5-flash:free,nvidia/nemotron-3-super-120b-a12b:free,qwen/qwen3-next-80b-a3b-instruct:free,openai/gpt-oss-20b:free,openrouter/free}
+      VISION_MODEL_NAME: ${VISION_MODEL_NAME:-nvidia/nemotron-nano-12b-v2-vl:free}
+      VISION_FALLBACK_MODEL_NAMES: ${VISION_FALLBACK_MODEL_NAMES:-nvidia/nemotron-nano-12b-v2-vl:free,openrouter/free}
+      FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:4173,http://localhost:4173}
+    restart: unless-stopped

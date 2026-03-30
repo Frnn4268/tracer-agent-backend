@@ -1,0 +1,40 @@
+name: backend-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run backend lint
+        run: python -m ruff check .
+      - name: Run backend tests
+        run: python -m pytest
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend image
+        run: docker build -t packet-tracer-backend:test .
+      - name: Run backend smoke test
+        run: |
+          docker run -d --rm --name packet-tracer-backend-smoke -p 8000:8000 packet-tracer-backend:test
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://127.0.0.1:8000/health; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8000/health
+          curl -fsS http://127.0.0.1:8000/
+          docker stop packet-tracer-backend-smoke
